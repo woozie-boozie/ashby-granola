@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/akhilmadan/Documents/projects/**)",
+      "WebSearch",
+      "WebFetch(domain:developers.ashbyhq.com)",
+      "WebFetch(domain:docs.granola.ai)",
+      "Bash(git clone:*)",
+      "Bash(git init:*)",
+      "Bash(git remote:*)",
+      "Bash(git pull:*)",
+      "Bash(git ls-remote:*)",
+      "Bash(python3 -m json.tool)",
+      "Bash(cp prima/.env.local /tmp/env-local-backup)",
+      "Bash(cp -r prima/.claude /tmp/claude-backup)",
+      "Bash(cp -r prima/.git /tmp/git-backup)"
+    ]
+  }
+}
