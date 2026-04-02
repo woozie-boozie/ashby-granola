@@ -1,64 +1,244 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { InterviewSelector } from "@/components/interview-selector";
+import { CandidateCard } from "@/components/candidate-card";
+import { CvViewer } from "@/components/cv-viewer";
+import { NotesInput } from "@/components/notes-input";
+import { StructuredNotes } from "@/components/structured-notes";
+import { FeedbackForm } from "@/components/feedback-form";
+import { SubmitPanel } from "@/components/submit-panel";
+import { GoogleSignIn } from "@/components/google-sign-in";
+import { CalendarInterviews } from "@/components/calendar-interviews";
+import type { FeedbackData } from "@/components/feedback-form";
+import type {
+  AshbyCandidate,
+  AshbyApplication,
+  AshbyInterview,
+} from "@/lib/ashby";
+
+type Phase = "select" | "interview" | "feedback";
 
 export default function Home() {
+  // Global state
+  const [phase, setPhase] = useState<Phase>("select");
+  const [candidates, setCandidates] = useState<AshbyCandidate[]>([]);
+  const [interviews, setInterviews] = useState<AshbyInterview[]>([]);
+  const [loadingCandidates, setLoadingCandidates] = useState(true);
+
+  // Selected candidate state
+  const [selectedCandidate, setSelectedCandidate] =
+    useState<AshbyCandidate | null>(null);
+  const [application, setApplication] = useState<AshbyApplication | null>(null);
+  const [selectedInterviewId, setSelectedInterviewId] = useState<string | null>(
+    null
+  );
+
+  // Feedback state
+  const [structuredNotes, setStructuredNotes] = useState("");
+  const [structuring, setStructuring] = useState(false);
+  const [feedback, setFeedback] = useState<FeedbackData>({
+    recommendation: "",
+    adjectives: [],
+    additionalThoughts: "",
+  });
+
+  // Load candidates and interview definitions on mount
+  useEffect(() => {
+    async function load() {
+      try {
+        const [candidatesRes, interviewsRes] = await Promise.all([
+          fetch("/api/ashby/candidates"),
+          fetch("/api/ashby/interviews?type=definitions"),
+        ]);
+        const candidatesData = await candidatesRes.json();
+        const interviewsData = await interviewsRes.json();
+        setCandidates(candidatesData.results || []);
+        setInterviews(interviewsData.results || []);
+      } catch (err) {
+        console.error("Failed to load data:", err);
+      } finally {
+        setLoadingCandidates(false);
+      }
+    }
+    load();
+  }, []);
+
+  // When a candidate is selected, fetch their first application
+  const handleSelectCandidate = useCallback(
+    async (candidate: AshbyCandidate) => {
+      setSelectedCandidate(candidate);
+      setPhase("interview");
+      setApplication(null);
+
+      if (candidate.applicationIds.length > 0) {
+        try {
+          const res = await fetch(
+            `/api/ashby/application?id=${candidate.applicationIds[0]}`
+          );
+          const data = await res.json();
+          if (data.results) {
+            setApplication(data.results);
+          }
+        } catch (err) {
+          console.error("Failed to load application:", err);
+        }
+      }
+    },
+    []
+  );
+
+  // Structure notes with Claude
+  const handleStructureNotes = useCallback(
+    async (rawNotes: string) => {
+      if (!selectedCandidate) return;
+      setStructuring(true);
+
+      const selectedInterview = interviews.find(
+        (i) => i.id === selectedInterviewId
+      );
+
+      try {
+        const res = await fetch("/api/structure-notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            rawNotes,
+            candidateName: selectedCandidate.name,
+            interviewType: selectedInterview?.title,
+            interviewRubric: selectedInterview?.instructionsPlain,
+          }),
+        });
+        const data = await res.json();
+        if (data.structured) {
+          setStructuredNotes(data.structured);
+        }
+      } catch (err) {
+        console.error("Failed to structure notes:", err);
+      } finally {
+        setStructuring(false);
+      }
+    },
+    [selectedCandidate, interviews, selectedInterviewId]
+  );
+
+  // Reset to start
+  const handleReset = () => {
+    setPhase("select");
+    setSelectedCandidate(null);
+    setApplication(null);
+    setSelectedInterviewId(null);
+    setStructuredNotes("");
+    setFeedback({
+      recommendation: "",
+      adjectives: [],
+      additionalThoughts: "",
+    });
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Left */}
+          <div className="flex items-center gap-3">
+            {phase === "interview" && (
+              <Button onClick={handleReset} variant="ghost" size="sm" className="gap-1">
+                ← Candidates
+              </Button>
+            )}
+            {phase === "feedback" && (
+              <Button onClick={() => setPhase("interview")} variant="ghost" size="sm" className="gap-1">
+                ← Candidate
+              </Button>
+            )}
+            <h1
+              className="text-lg font-bold cursor-pointer hover:text-primary transition-colors"
+              onClick={handleReset}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              Interview Cockpit
+            </h1>
+            {selectedCandidate && (
+              <span className="text-sm text-muted-foreground">
+                — {selectedCandidate.name}
+              </span>
+            )}
+          </div>
+
+          {/* Right */}
+          <div className="flex items-center gap-2">
+            {phase === "interview" && (
+              <Button
+                onClick={() => setPhase("feedback")}
+                variant="default"
+                size="sm"
+              >
+                Submit Feedback →
+              </Button>
+            )}
+            <GoogleSignIn />
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6">
+        {/* Phase 1: Select Candidate */}
+        {phase === "select" && (
+          <div className="space-y-6">
+            <CalendarInterviews onSelectCandidate={handleSelectCandidate} />
+            <InterviewSelector
+              candidates={candidates}
+              loading={loadingCandidates}
+              onSelect={handleSelectCandidate}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          </div>
+        )}
+
+        {/* Phase 2: During Interview */}
+        {phase === "interview" && selectedCandidate && (
+          <div className="grid gap-4 h-[calc(100vh-100px)]" style={{ gridTemplateColumns: "30% 1fr" }}>
+            <div className="overflow-auto">
+              <CandidateCard
+                candidate={selectedCandidate}
+                application={application}
+                interviews={interviews}
+              />
+            </div>
+            <CvViewer candidate={selectedCandidate} />
+          </div>
+        )}
+
+        {/* Phase 3: Post-Interview Feedback */}
+        {phase === "feedback" && selectedCandidate && (
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Left column: Notes + Structured output */}
+            <div className="space-y-6">
+              <NotesInput
+                onStructure={handleStructureNotes}
+                structuring={structuring}
+              />
+              {structuredNotes && (
+                <StructuredNotes markdown={structuredNotes} />
+              )}
+            </div>
+
+            {/* Right column: Feedback form + Submit */}
+            <div className="space-y-6">
+              <FeedbackForm
+                feedback={feedback}
+                onFeedbackChange={setFeedback}
+              />
+              <SubmitPanel
+                structuredNotes={structuredNotes}
+                feedback={feedback}
+                candidateName={selectedCandidate.name}
+              />
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
