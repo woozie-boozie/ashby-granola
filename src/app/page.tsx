@@ -205,8 +205,9 @@ function AuthenticatedHome() {
   }, [directCandidateId, candidates, handleSelectCandidate]);
 
   // Auto-select candidate from ?meet= query parameter (Chrome extension)
+  // Fetches calendar independently — does NOT wait for the candidates list
   useEffect(() => {
-    if (!meetCode || meetHandled.current || candidates.length === 0) return;
+    if (!meetCode || meetHandled.current) return;
     meetHandled.current = true;
 
     fetch("/api/google/calendar")
@@ -218,11 +219,23 @@ function AuthenticatedHome() {
             e.meetLink?.includes(meetCode) && e.matchedCandidate
         );
         if (matched?.matchedCandidate) {
-          handleSelectCandidate(matched.matchedCandidate);
+          const candidate = matched.matchedCandidate;
+          setSelectedCandidate(candidate);
+          setPhase("interview");
+
+          // Also load application
+          if (candidate.applicationIds?.length > 0) {
+            fetch(`/api/ashby/application?id=${candidate.applicationIds[0]}`)
+              .then((r) => r.json())
+              .then((appData) => {
+                if (appData.results) setApplication(appData.results);
+              })
+              .catch(console.error);
+          }
         }
       })
       .catch(console.error);
-  }, [meetCode, candidates, handleSelectCandidate]);
+  }, [meetCode]);
 
   // Structure notes with Claude
   const handleStructureNotes = useCallback(
