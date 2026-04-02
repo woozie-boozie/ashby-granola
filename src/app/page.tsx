@@ -58,9 +58,39 @@ function Home() {
 
   const searchParams = useSearchParams();
   const meetCode = searchParams.get("meet");
+  const directCandidateId = searchParams.get("candidateId");
   const meetHandled = useRef(false);
+  const directHandled = useRef(false);
 
-  // Load candidates and interview definitions on mount
+  // If ?candidateId= is provided, load that candidate instantly (no waiting for full list)
+  useEffect(() => {
+    if (!directCandidateId || directHandled.current) return;
+    directHandled.current = true;
+
+    async function loadDirect() {
+      try {
+        const res = await fetch(`/api/ashby/candidate?id=${directCandidateId}`);
+        const data = await res.json();
+        if (data.results) {
+          const candidate = data.results;
+          setSelectedCandidate(candidate);
+          setPhase("interview");
+
+          // Also load application
+          if (candidate.applicationIds?.length > 0) {
+            const appRes = await fetch(`/api/ashby/application?id=${candidate.applicationIds[0]}`);
+            const appData = await appRes.json();
+            if (appData.results) setApplication(appData.results);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load candidate directly:", err);
+      }
+    }
+    loadDirect();
+  }, [directCandidateId]);
+
+  // Load candidates and interview definitions on mount (in background)
   useEffect(() => {
     async function load() {
       try {
@@ -104,6 +134,17 @@ function Home() {
     },
     []
   );
+
+  // Auto-select candidate from ?candidateId= query parameter (direct/test)
+  useEffect(() => {
+    if (!directCandidateId || directHandled.current || candidates.length === 0) return;
+    directHandled.current = true;
+
+    const candidate = candidates.find((c) => c.id === directCandidateId);
+    if (candidate) {
+      handleSelectCandidate(candidate);
+    }
+  }, [directCandidateId, candidates, handleSelectCandidate]);
 
   // Auto-select candidate from ?meet= query parameter (Chrome extension)
   useEffect(() => {
