@@ -20,8 +20,11 @@ import type {
 } from "@/lib/ashby";
 
 import { Suspense } from "react";
+import { useSession, signIn } from "next-auth/react";
 
 type Phase = "select" | "interview" | "feedback";
+
+const ALLOWED_DOMAIN = "primamente.com";
 
 // Wrapper to provide Suspense boundary for useSearchParams
 export default function Page() {
@@ -33,6 +36,60 @@ export default function Page() {
 }
 
 function Home() {
+  const { data: session, status } = useSession();
+
+  // Loading state
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  // Not signed in — show sign-in page
+  if (!session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-6 max-w-md">
+          <h1 className="text-3xl font-bold">Interview Cockpit</h1>
+          <p className="text-muted-foreground">
+            Sign in with your Prima Mente Google account to access the interview dashboard.
+          </p>
+          <Button onClick={() => signIn("google")} size="lg">
+            Sign in with Google
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Signed in but wrong domain
+  const email = session.user?.email || "";
+  if (!email.endsWith(`@${ALLOWED_DOMAIN}`)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4 max-w-md">
+          <h1 className="text-2xl font-bold">Access Denied</h1>
+          <p className="text-muted-foreground">
+            Only @{ALLOWED_DOMAIN} accounts can access this tool.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Signed in as: {email}
+          </p>
+          <Button variant="outline" onClick={() => signIn("google")}>
+            Sign in with a different account
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Signed in with correct domain — render the app
+  return <AuthenticatedHome />;
+}
+
+function AuthenticatedHome() {
   // Global state
   const [phase, setPhase] = useState<Phase>("select");
   const [candidates, setCandidates] = useState<AshbyCandidate[]>([]);
