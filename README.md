@@ -1,4 +1,4 @@
-# Interview Cockpit
+# Interview Agent
 
 A recruitment workflow tool that pulls candidate data from Ashby, structures interview notes with AI, and auto-opens candidate profiles when you join Google Meet calls.
 
@@ -25,7 +25,7 @@ The extension auto-opens the candidate dashboard when you join a Google Meet int
 5. Toggle **Developer mode** ON (top right corner)
 6. Click **Load unpacked**
 7. Select the **`chrome-extension`** folder from inside the unzipped repo
-8. You should see "Interview Cockpit" appear in your extensions list
+8. You should see "Interview Agent" appear in your extensions list
 
 ### Step 3: You're done
 
@@ -42,7 +42,7 @@ That's it. Here's how it works:
 ### When you join an interview
 - Click **"Join"** on a Google Calendar meeting as you normally do
 - Google Meet opens in one tab
-- The **Interview Cockpit automatically opens** in another tab with the candidate's profile loaded (matched by attendee email)
+- The **Interview Agent automatically opens** in another tab with the candidate's profile loaded (matched by attendee email)
 
 ### After an interview
 1. Click **"Submit Feedback"** in the top right

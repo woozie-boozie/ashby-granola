@@ -79,7 +79,7 @@ export function InterviewSelector({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Interview Cockpit</h2>
+        <h2 className="text-2xl font-bold mb-2">Interview Agent</h2>
         <p className="text-muted-foreground">
           Select a candidate to start your interview session
         </p>

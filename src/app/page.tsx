@@ -53,7 +53,7 @@ function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-6 max-w-md">
-          <h1 className="text-3xl font-bold">Interview Cockpit</h1>
+          <h1 className="text-3xl font-bold">Interview Agent</h1>
           <p className="text-muted-foreground">
             Sign in with your Prima Mente Google account to access the interview dashboard.
           </p>
@@ -288,7 +288,7 @@ function AuthenticatedHome() {
               className="text-lg font-bold cursor-pointer hover:text-primary transition-colors"
               onClick={handleReset}
             >
-              Interview Cockpit
+              Interview Agent
             </h1>
             {selectedCandidate && (
               <span className="text-sm text-muted-foreground">

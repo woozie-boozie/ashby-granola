@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Interview Cockpit",
+  "name": "Interview Agent",
   "version": "1.0",
-  "description": "Auto-open Interview Cockpit when joining Google Meet",
+  "description": "Auto-open Interview Agent when joining Google Meet",
   "permissions": ["tabs"],
   "background": {
     "service_worker": "background.js"

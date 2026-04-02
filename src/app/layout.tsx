@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Interview Cockpit",
+  title: "Interview Agent",
   description: "Ashby + Granola interview workflow tool",
 };
 
