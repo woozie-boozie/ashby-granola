@@ -315,13 +315,19 @@ function AuthenticatedHome() {
 
         {/* Phase 2: Interview + Feedback (single page) */}
         {phase === "interview" && selectedCandidate && (
-          <div className="grid gap-4 h-[calc(100vh-100px)]" style={{ gridTemplateColumns: "35% 1fr" }}>
-            {/* Left: Candidate info + Feedback */}
-            <div className="overflow-auto space-y-4">
+          <div className="grid gap-4 h-[calc(100vh-100px)]" style={{ gridTemplateColumns: "60% 1fr" }}>
+            {/* Left: Candidate info + CV */}
+            <div className="flex flex-col gap-4 min-h-0">
               <CandidateCard
                 candidate={selectedCandidate}
                 application={application}
               />
+              <div className="flex-1 min-h-0">
+                <CvViewer candidate={selectedCandidate} />
+              </div>
+            </div>
+            {/* Right: Notes + Feedback */}
+            <div className="overflow-auto space-y-4">
               <NotesInput
                 onStructure={handleStructureNotes}
                 structuring={structuring}
@@ -339,8 +345,6 @@ function AuthenticatedHome() {
                 candidateName={selectedCandidate.name}
               />
             </div>
-            {/* Right: CV */}
-            <CvViewer candidate={selectedCandidate} />
           </div>
         )}
       </main>

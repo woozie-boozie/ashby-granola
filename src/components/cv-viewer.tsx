@@ -41,20 +41,6 @@ export function CvViewer({ candidate }: CvViewerProps) {
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader className="py-3 flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-sm font-medium">
-          {candidate.resumeFileHandle.name}
-        </CardTitle>
-        {resumeUrl && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open(resumeUrl, "_blank")}
-          >
-            Open in New Tab
-          </Button>
-        )}
-      </CardHeader>
       <CardContent className="flex-1 p-0">
         {loading ? (
           <div className="flex items-center justify-center h-full">
