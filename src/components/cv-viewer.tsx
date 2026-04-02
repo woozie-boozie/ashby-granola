@@ -62,7 +62,7 @@ export function CvViewer({ candidate }: CvViewerProps) {
           </div>
         ) : resumeUrl ? (
           <iframe
-            src={resumeUrl}
+            src={`${resumeUrl}#navpanes=0`}
             className="w-full h-full rounded-b-lg"
             style={{ minHeight: "calc(100vh - 140px)" }}
             title={`Resume - ${candidate.name}`}
