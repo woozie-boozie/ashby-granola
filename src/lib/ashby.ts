@@ -60,10 +60,11 @@ export async function listAllCandidates(maxPages = 30): Promise<AshbyCandidate[]
   return all;
 }
 
-async function listActiveApplicationCandidateIds(maxPages = 20): Promise<Set<string>> {
-  const ids = new Set<string>();
+export async function listActiveCandidates(): Promise<AshbyCandidate[]> {
+  // Step 1: Get all unique candidate IDs from active applications
+  const candidateIds = new Set<string>();
   let cursor: string | undefined;
-  for (let i = 0; i < maxPages; i++) {
+  for (let i = 0; i < 20; i++) {
     const data = await ashbyRequest<{
       success: boolean;
       results: { candidate: { id: string } }[];
@@ -75,20 +76,26 @@ async function listActiveApplicationCandidateIds(maxPages = 20): Promise<Set<str
       ...(cursor ? { cursor } : {}),
     });
     for (const app of data.results) {
-      ids.add(app.candidate.id);
+      candidateIds.add(app.candidate.id);
     }
     if (!data.moreDataAvailable || !data.nextCursor) break;
     cursor = data.nextCursor;
   }
-  return ids;
-}
 
-export async function listActiveCandidates(): Promise<AshbyCandidate[]> {
-  const [allCandidates, activeIds] = await Promise.all([
-    listAllCandidates(),
-    listActiveApplicationCandidateIds(),
-  ]);
-  return allCandidates.filter((c) => activeIds.has(c.id));
+  // Step 2: Fetch full candidate details in parallel batches
+  const ids = Array.from(candidateIds);
+  const batchSize = 20;
+  const candidates: AshbyCandidate[] = [];
+  for (let i = 0; i < ids.length; i += batchSize) {
+    const batch = ids.slice(i, i + batchSize);
+    const results = await Promise.all(
+      batch.map((id) => getCandidate(id).then((d) => d.results).catch(() => null))
+    );
+    for (const c of results) {
+      if (c) candidates.push(c);
+    }
+  }
+  return candidates;
 }
 
 export async function getCandidate(candidateId: string) {
