@@ -1,4 +1,4 @@
-const COCKPIT_BASE = "http://localhost:3000";
+const COCKPIT_BASE = "https://prima-rho.vercel.app";
 
 // Track which meet codes we've already opened the cockpit for
 // so we don't open multiple tabs for the same meeting
