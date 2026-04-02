@@ -25,6 +25,7 @@ import { useSession, signIn } from "next-auth/react";
 type Phase = "select" | "interview" | "feedback";
 
 const ALLOWED_DOMAIN = "primamente.com";
+const ALLOWED_EMAILS = ["akhil1189@gmail.com"];
 
 // Wrapper to provide Suspense boundary for useSearchParams
 export default function Page() {
@@ -66,7 +67,7 @@ function Home() {
 
   // Signed in but wrong domain
   const email = session.user?.email || "";
-  if (!email.endsWith(`@${ALLOWED_DOMAIN}`)) {
+  if (!email.endsWith(`@${ALLOWED_DOMAIN}`) && !ALLOWED_EMAILS.includes(email)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4 max-w-md">
