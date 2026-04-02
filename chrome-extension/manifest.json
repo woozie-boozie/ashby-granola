@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Interview Cockpit",
+  "version": "1.0",
+  "description": "Auto-open Interview Cockpit when joining Google Meet",
+  "permissions": ["tabs"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

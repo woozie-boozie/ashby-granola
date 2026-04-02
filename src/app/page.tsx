@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { InterviewSelector } from "@/components/interview-selector";
 import { CandidateCard } from "@/components/candidate-card";
@@ -18,9 +19,20 @@ import type {
   AshbyInterview,
 } from "@/lib/ashby";
 
+import { Suspense } from "react";
+
 type Phase = "select" | "interview" | "feedback";
 
-export default function Home() {
+// Wrapper to provide Suspense boundary for useSearchParams
+export default function Page() {
+  return (
+    <Suspense>
+      <Home />
+    </Suspense>
+  );
+}
+
+function Home() {
   // Global state
   const [phase, setPhase] = useState<Phase>("select");
   const [candidates, setCandidates] = useState<AshbyCandidate[]>([]);
@@ -43,6 +55,10 @@ export default function Home() {
     adjectives: [],
     additionalThoughts: "",
   });
+
+  const searchParams = useSearchParams();
+  const meetCode = searchParams.get("meet");
+  const meetHandled = useRef(false);
 
   // Load candidates and interview definitions on mount
   useEffect(() => {
@@ -88,6 +104,26 @@ export default function Home() {
     },
     []
   );
+
+  // Auto-select candidate from ?meet= query parameter (Chrome extension)
+  useEffect(() => {
+    if (!meetCode || meetHandled.current || candidates.length === 0) return;
+    meetHandled.current = true;
+
+    fetch("/api/google/calendar")
+      .then((res) => res.json())
+      .then((data) => {
+        const events = data.events || [];
+        const matched = events.find(
+          (e: { meetLink: string | null; matchedCandidate: AshbyCandidate | null }) =>
+            e.meetLink?.includes(meetCode) && e.matchedCandidate
+        );
+        if (matched?.matchedCandidate) {
+          handleSelectCandidate(matched.matchedCandidate);
+        }
+      })
+      .catch(console.error);
+  }, [meetCode, candidates, handleSelectCandidate]);
 
   // Structure notes with Claude
   const handleStructureNotes = useCallback(
