@@ -60,6 +60,37 @@ export async function listAllCandidates(maxPages = 30): Promise<AshbyCandidate[]
   return all;
 }
 
+async function listActiveApplicationCandidateIds(maxPages = 20): Promise<Set<string>> {
+  const ids = new Set<string>();
+  let cursor: string | undefined;
+  for (let i = 0; i < maxPages; i++) {
+    const data = await ashbyRequest<{
+      success: boolean;
+      results: { candidate: { id: string } }[];
+      moreDataAvailable: boolean;
+      nextCursor?: string;
+    }>("application.list", {
+      status: "Active",
+      limit: 100,
+      ...(cursor ? { cursor } : {}),
+    });
+    for (const app of data.results) {
+      ids.add(app.candidate.id);
+    }
+    if (!data.moreDataAvailable || !data.nextCursor) break;
+    cursor = data.nextCursor;
+  }
+  return ids;
+}
+
+export async function listActiveCandidates(): Promise<AshbyCandidate[]> {
+  const [allCandidates, activeIds] = await Promise.all([
+    listAllCandidates(),
+    listActiveApplicationCandidateIds(),
+  ]);
+  return allCandidates.filter((c) => activeIds.has(c.id));
+}
+
 export async function getCandidate(candidateId: string) {
   return ashbyRequest<{
     success: boolean;
