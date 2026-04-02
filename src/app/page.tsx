@@ -10,7 +10,7 @@ import { NotesInput } from "@/components/notes-input";
 import { StructuredNotes } from "@/components/structured-notes";
 import { FeedbackForm } from "@/components/feedback-form";
 import { SubmitPanel } from "@/components/submit-panel";
-import { GoogleSignIn } from "@/components/google-sign-in";
+import { UserMenu } from "@/components/user-menu";
 import { CalendarInterviews } from "@/components/calendar-interviews";
 import type { FeedbackData } from "@/components/feedback-form";
 import type {
@@ -312,7 +312,7 @@ function AuthenticatedHome() {
                 Submit Feedback →
               </Button>
             )}
-            <GoogleSignIn />
+            <UserMenu />
           </div>
         </div>
       </header>
