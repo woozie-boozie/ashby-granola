@@ -22,7 +22,7 @@ import type {
 import { Suspense } from "react";
 import { useSession, signIn } from "next-auth/react";
 
-type Phase = "select" | "interview" | "feedback";
+type Phase = "select" | "interview";
 
 const ALLOWED_DOMAIN = "primamente.com";
 const ALLOWED_EMAILS = ["akhil1189@gmail.com"];
@@ -284,11 +284,6 @@ function AuthenticatedHome() {
                 ← Candidates
               </Button>
             )}
-            {phase === "feedback" && (
-              <Button onClick={() => setPhase("interview")} variant="ghost" size="sm" className="gap-1">
-                ← Candidate
-              </Button>
-            )}
             <h1
               className="text-lg font-bold cursor-pointer hover:text-primary transition-colors"
               onClick={handleReset}
@@ -304,15 +299,6 @@ function AuthenticatedHome() {
 
           {/* Right */}
           <div className="flex items-center gap-2">
-            {phase === "interview" && (
-              <Button
-                onClick={() => setPhase("feedback")}
-                variant="default"
-                size="sm"
-              >
-                Submit Feedback →
-              </Button>
-            )}
             <UserMenu />
           </div>
         </div>
@@ -332,25 +318,15 @@ function AuthenticatedHome() {
           </div>
         )}
 
-        {/* Phase 2: During Interview */}
+        {/* Phase 2: Interview + Feedback (single page) */}
         {phase === "interview" && selectedCandidate && (
-          <div className="grid gap-4 h-[calc(100vh-100px)]" style={{ gridTemplateColumns: "30% 1fr" }}>
-            <div className="overflow-auto">
+          <div className="grid gap-4 h-[calc(100vh-100px)]" style={{ gridTemplateColumns: "35% 1fr" }}>
+            {/* Left: Candidate info + Feedback */}
+            <div className="overflow-auto space-y-4">
               <CandidateCard
                 candidate={selectedCandidate}
                 application={application}
-                interviews={interviews}
               />
-            </div>
-            <CvViewer candidate={selectedCandidate} />
-          </div>
-        )}
-
-        {/* Phase 3: Post-Interview Feedback */}
-        {phase === "feedback" && selectedCandidate && (
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Left column: Notes + Structured output */}
-            <div className="space-y-6">
               <NotesInput
                 onStructure={handleStructureNotes}
                 structuring={structuring}
@@ -358,10 +334,6 @@ function AuthenticatedHome() {
               {structuredNotes && (
                 <StructuredNotes markdown={structuredNotes} />
               )}
-            </div>
-
-            {/* Right column: Feedback form + Submit */}
-            <div className="space-y-6">
               <FeedbackForm
                 feedback={feedback}
                 onFeedbackChange={setFeedback}
@@ -372,6 +344,8 @@ function AuthenticatedHome() {
                 candidateName={selectedCandidate.name}
               />
             </div>
+            {/* Right: CV */}
+            <CvViewer candidate={selectedCandidate} />
           </div>
         )}
       </main>
