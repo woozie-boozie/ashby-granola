@@ -26,8 +26,8 @@ export function NotesInput({ onStructure, structuring }: NotesInputProps) {
           placeholder="Paste your Granola notes here..."
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          rows={10}
-          className="font-mono text-sm"
+          rows={5}
+          className="font-mono text-sm h-32 resize-none"
         />
         <Button
           onClick={() => onStructure(notes)}

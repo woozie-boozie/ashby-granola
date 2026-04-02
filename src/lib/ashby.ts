@@ -60,7 +60,17 @@ export async function listAllCandidates(maxPages = 30): Promise<AshbyCandidate[]
   return all;
 }
 
+// In-memory cache for active candidates (shared across requests in same function instance)
+let cachedCandidates: AshbyCandidate[] | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+
 export async function listActiveCandidates(): Promise<AshbyCandidate[]> {
+  // Return cached if fresh
+  if (cachedCandidates && Date.now() - cacheTimestamp < CACHE_TTL) {
+    return cachedCandidates;
+  }
+
   // Step 1: Get all unique candidate IDs from active applications
   const candidateIds = new Set<string>();
   let cursor: string | undefined;
@@ -95,6 +105,8 @@ export async function listActiveCandidates(): Promise<AshbyCandidate[]> {
       if (c) candidates.push(c);
     }
   }
+  cachedCandidates = candidates;
+  cacheTimestamp = Date.now();
   return candidates;
 }
 

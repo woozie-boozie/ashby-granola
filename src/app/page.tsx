@@ -290,11 +290,6 @@ function AuthenticatedHome() {
             >
               Interview Agent
             </h1>
-            {selectedCandidate && (
-              <span className="text-sm text-muted-foreground">
-                — {selectedCandidate.name}
-              </span>
-            )}
           </div>
 
           {/* Right */}

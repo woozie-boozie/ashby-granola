@@ -22,7 +22,7 @@ export function StructuredNotes({ markdown }: StructuredNotesProps) {
       </CardHeader>
       <CardContent>
         <div
-          className="prose prose-sm max-w-none"
+          className="prose prose-sm max-w-none max-h-48 overflow-auto"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </CardContent>

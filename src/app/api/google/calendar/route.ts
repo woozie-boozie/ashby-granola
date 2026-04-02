@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { google } from "googleapis";
-import { listCandidates } from "@/lib/ashby";
+import { listActiveCandidates } from "@/lib/ashby";
 
 export async function GET() {
   try {
@@ -63,8 +63,7 @@ export async function GET() {
     // Fetch Ashby candidates to match
     let matchedEvents;
     try {
-      const candidatesData = await listCandidates();
-      const candidates = candidatesData.results || [];
+      const candidates = await listActiveCandidates();
 
       // Build email → candidate lookup
       const emailMap = new Map<string, (typeof candidates)[0]>();
