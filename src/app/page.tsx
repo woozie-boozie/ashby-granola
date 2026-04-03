@@ -120,6 +120,21 @@ function AuthenticatedHome() {
   const meetHandled = useRef(false);
   const directHandled = useRef(false);
 
+  // Keep URL in sync with selected candidate so deep-links work
+  useEffect(() => {
+    if (selectedCandidate) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("candidateId", selectedCandidate.id);
+      url.searchParams.delete("meet");
+      window.history.replaceState({}, "", url.toString());
+    } else if (phase === "select") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("candidateId");
+      url.searchParams.delete("meet");
+      window.history.replaceState({}, "", url.pathname);
+    }
+  }, [selectedCandidate, phase]);
+
   // If ?candidateId= is provided, load that candidate instantly (no waiting for full list)
   useEffect(() => {
     if (!directCandidateId || directHandled.current) return;
