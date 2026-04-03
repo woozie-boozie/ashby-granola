@@ -46,25 +46,26 @@ export function CandidateCard({ candidate, application }: CandidateCardProps) {
     <Card>
       {/* Header */}
       <CardHeader className="pb-3">
-        <div className="flex items-start gap-4">
-          <div className={`${color} w-14 h-14 rounded-full flex items-center justify-center text-white text-lg font-bold shrink-0`}>
+        <div className="flex items-start gap-3">
+          <div className={`${color} w-10 h-10 xl:w-14 xl:h-14 rounded-full flex items-center justify-center text-white text-sm xl:text-lg font-bold shrink-0`}>
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-xl">{candidate.name}</CardTitle>
+            <CardTitle className="text-base xl:text-xl">{candidate.name}</CardTitle>
             {candidate.position && (
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground truncate">
                 {candidate.position}
                 {candidate.company ? ` at ${candidate.company}` : ""}
               </p>
             )}
             {candidate.school && (
-              <p className="text-sm text-muted-foreground">{candidate.school}</p>
+              <p className="text-xs xl:text-sm text-muted-foreground truncate">{candidate.school}</p>
             )}
           </div>
           <Button
             variant="default"
             size="sm"
+            className="shrink-0"
             onClick={() => window.open(candidate.profileUrl, "_blank")}
           >
             Open in Ashby

@@ -23,17 +23,20 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
     const cockpitUrl = `${COCKPIT_BASE}?meet=${encodeURIComponent(meetCode)}`;
 
-    // Check if cockpit is already open in another tab
+    // Check if cockpit is already open in a window
     chrome.tabs.query({ url: `${COCKPIT_BASE}/*` }, (tabs) => {
       if (tabs.length > 0) {
-        // Update existing cockpit tab
-        chrome.tabs.update(tabs[0].id, {
-          url: cockpitUrl,
-          active: true,
-        });
+        // Update existing cockpit tab and focus its window
+        chrome.tabs.update(tabs[0].id, { url: cockpitUrl, active: true });
+        chrome.windows.update(tabs[0].windowId, { focused: true });
       } else {
-        // Open new cockpit tab
-        chrome.tabs.create({ url: cockpitUrl });
+        // Open a new popup window for the cockpit
+        chrome.windows.create({
+          url: cockpitUrl,
+          type: "popup",
+          width: 1200,
+          height: 900,
+        });
       }
     });
   }

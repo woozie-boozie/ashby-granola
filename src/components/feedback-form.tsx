@@ -63,7 +63,7 @@ export function FeedbackForm({ onFeedbackChange, feedback }: FeedbackFormProps) 
                 onClick={() =>
                   onFeedbackChange({ ...feedback, recommendation: opt.value })
                 }
-                className={`px-4 py-3 rounded-lg text-sm font-medium transition-all border-2 ${
+                className={`px-3 py-2 xl:px-4 xl:py-3 rounded-lg text-xs xl:text-sm font-medium transition-all border-2 ${
                   feedback.recommendation === opt.value
                     ? `${opt.color} text-white border-transparent scale-105`
                     : "bg-secondary text-secondary-foreground border-transparent hover:border-primary/30"

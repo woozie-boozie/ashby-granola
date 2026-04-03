@@ -304,9 +304,9 @@ function AuthenticatedHome() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="container mx-auto px-3 py-2 xl:px-4 xl:py-3 flex items-center justify-between">
           {/* Left */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 xl:gap-3">
             {phase === "interview" && (
               <Button onClick={handleReset} variant="ghost" size="sm" className="gap-1">
                 ← Candidates
@@ -328,7 +328,7 @@ function AuthenticatedHome() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-3 py-3 xl:px-4 xl:py-6">
         {/* Phase 1: Select Candidate */}
         {phase === "select" && (
           <div className="space-y-6">
@@ -343,7 +343,7 @@ function AuthenticatedHome() {
 
         {/* Phase 2: Interview + Feedback (single page) */}
         {phase === "interview" && selectedCandidate && (
-          <div className="grid gap-4 h-[calc(100vh-100px)]" style={{ gridTemplateColumns: "60% 1fr" }}>
+          <div className="grid gap-4 grid-cols-1 xl:grid-cols-[3fr_2fr] xl:h-[calc(100vh-100px)]">
             {/* Left: Candidate info + CV */}
             <div className="flex flex-col gap-4 min-h-0">
               <CandidateCard
